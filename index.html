@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Магический шар — демо</title><link rel="stylesheet" href="./style.css"></head>
+<body>
+<main class="mock">
+ <header><div class="brand">Сбер<span>Kids</span></div><button class="avatar" id="avatar" aria-label="Запустить шар">✦</button></header>
+ <div class="welcome">Привет! 👋<h1>Твой день — твои открытия</h1><p>Это демонстрационный интерфейс, не настоящее приложение СберKids.</p></div>
+ <section class="balance"><small>Моя копилка</small><strong>1 250 ₽</strong><div class="meter"><span></span></div></section>
+ <div class="tiles"><button class="tile">💚<br>Копилка</button><button class="tile">⭐<br>Награды</button><button class="tile">🎮<br>Игры</button><button class="tile">🐱<br>СберКот</button></div>
+ <p class="hint">Потряси телефон или нажми на аватар ✦</p><p class="test-status" id="testStatus" aria-live="polite">Нажатия по карточкам работают даже во время эффекта.</p>
+</main>
+<div id="magicLayer" aria-hidden="true"><div id="particles"></div><div id="orb"><div class="halo"></div><img id="ballImage" alt=""><div id="prediction"></div></div></div>
+<div class="controls"><label>Сезон <select id="season"><option value="summer">Лето</option><option value="autumn">Осень</option><option value="winter">Зима</option><option value="spring">Весна</option></select></label><button id="start">🔮 Запустить</button><button id="motion">Включить тряску</button><button id="hide">Скрыть</button></div>
+<script src="./main.js"></script></body></html>
