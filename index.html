@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#21A038">
+<title>СберКот · Приколы — прототип</title>
+<style>
+/* ===== Основные цвета и база ===== */
+:root {
+  --green: #21A038;        /* фирменный зелёный */
+  --green-dark: #17822B;
+  --green-soft: #E3F1DF;
+  --bg: #F4F7F2;           /* светлый фон */
+  --card: #FFFFFF;
+  --text: #1A1D1E;
+  --text-soft: #6E7A72;
+  --radius: 20px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  background: linear-gradient(180deg, #EAF2E6, #DCE9D7);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: var(--text);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 12px;
+}
+
+/* ===== Мок-экран телефона ===== */
+.phone {
+  width: 100%;
+  max-width: 420px;               /* ширина 360–430px */
+  min-height: calc(100dvh - 24px);
+  background: var(--bg);
+  border-radius: 36px;
+  border: 1px solid rgba(0, 0, 0, .06);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .16);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+/* на маленьких экранах мок занимает весь экран */
+@media (max-width: 440px) {
+  body { padding: 0; }
+  .phone { max-width: 100%; min-height: 100dvh; border-radius: 0; box-shadow: none; border: 0; }
+}
+
+/* шапка: аватар-кот + приветствие */
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px 10px;
+}
+.avatar {
+  width: 54px; height: 54px;
+  border-radius: 50%;
+  background: var(--card);
+  border: 2px solid var(--green-soft);
+  display: grid; place-items: center;
+  flex: none;
+}
+.greeting { flex: 1; }
+.hello { font-size: 13px; color: var(--text-soft); }
+.name { font-size: 18px; font-weight: 700; }
+.bell {
+  width: 44px; height: 44px;
+  border: 0; border-radius: 14px;
+  background: var(--card);
+  color: var(--green-dark);
+  display: grid; place-items: center;
+  cursor: pointer;
+}
+
+/* СберКарта */
+.sber-card {
+  margin: 8px 16px 4px;
+  padding: 18px;
+  border-radius: 24px;
+  color: #fff;
+  background: linear-gradient(135deg, #26A743, #178A2C 55%, #106B20);
+  box-shadow: 0 14px 30px rgba(33, 160, 56, .30);
+}
+.card-top { display: flex; justify-content: space-between; align-items: center; }
+.card-chip {
+  font-size: 13px; font-weight: 600;
+  background: rgba(255,255,255,.18);
+  padding: 5px 12px;
+  border-radius: 999px;
+}
+.balance-label { margin-top: 14px; font-size: 12px; opacity: .85; }
+.balance { font-size: 34px; font-weight: 800; letter-spacing: .5px; }
+.balance .cur { font-size: 22px; font-weight: 700; }
+.card-foot { margin-top: 6px; font-size: 12px; opacity: .85; }
+
+/* Бонусы Спасибо */
+.bonus {
+  margin: 12px 16px;
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.bonus-icon {
+  width: 46px; height: 46px; flex: none;
+  border-radius: 14px;
+  background: var(--green-soft);
+  color: var(--green-dark);
+  display: grid; place-items: center;
+}
+.bonus-text { flex: 1; }
+.bonus-label { font-size: 13px; color: var(--text-soft); }
+.bonus-num { font-size: 22px; font-weight: 800; color: var(--green); }
+.bonus-num span { font-size: 13px; font-weight: 600; color: var(--text-soft); }
+.bonus-arrow { font-size: 24px; color: #B9C4BC; }
+
+/* «Скинуть денег» и квадрат «Себе» */
+.actions { display: flex; gap: 12px; padding: 4px 16px 8px; }
+.action-card {
+  flex: 1;
+  border: 0; cursor: pointer;
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 16px;
+  display: flex; align-items: center; gap: 12px;
+  font: 600 15px/1.25 inherit;
+  color: var(--text);
+  text-align: left;
+}
+.action-card:active { transform: scale(.98); }
+.action-square { width: 118px; flex: none; flex-direction: column; gap: 10px; text-align: center; }
+.action-ico {
+  width: 42px; height: 42px; flex: none;
+  border-radius: 12px;
+  background: var(--green-soft);
+  color: var(--green-dark);
+  display: grid; place-items: center;
+}
+
+/* Панель управления эффектом (fallback) */
+.controls { padding: 10px 16px 14px; }
+.hint { font-size: 13px; color: var(--text-soft); text-align: center; margin-bottom: 10px; }
+.btn {
+  width: 100%;
+  padding: 13px;
+  border: 0;
+  border-radius: 16px;
+  background: var(--green);
+  color: #fff;
+  font: 700 16px/1 inherit;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(33, 160, 56, .30);
+}
+.btn:active { transform: scale(.98); }
+.btn.ghost { background: var(--card); color: var(--green-dark); border: 2px solid var(--green-soft); box-shadow: none; }
+.btn + .btn { margin-top: 10px; }
+.hidden { display: none !important; }
+
+/* Нижняя панель: 4 вкладки */
+.navbar {
+  margin-top: auto;
+  background: var(--card);
+  border-top: 1px solid #E6EBE4;
+  display: flex;
+  padding: 8px 6px calc(10px + env(safe-area-inset-bottom));
+}
+.nav-item {
+  flex: 1;
+  border: 0; background: none; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  font: 500 11px/1 inherit;
+  color: var(--text-soft);
+  padding: 6px 0;
+}
+.nav-item.active { color: var(--green); font-weight: 700; }
+
+/* ===== Слой эффекта (поверх всего, но не блокирует ввод) ===== */
+.fx {
+  position: fixed;
+  inset: 0;
+  z-index: 999;                 /* выше контента */
+  pointer-events: none;         /* клики проходят сквозь слой */
+  opacity: 0;
+  transition: opacity .3s ease;
+}
+.fx.on { opacity: 1; }
+
+/* СберКот — ловит монетки */
+.fx-cat {
+  position: fixed;
+  width: 150px;
+  transform: translateX(-50%);
+  will-change: transform;
+}
+.fx.on .fx-cat { animation: catSway 1.2s ease-in-out infinite; }
+.fx-cat.bop .fx-cat-inner { animation: catBop .2s ease; }
+.fx-cat svg {
+  width: 100%; height: auto; display: block;
+  filter: drop-shadow(0 10px 14px rgba(20, 110, 40, .30));
+}
+@keyframes catSway {
+  0%, 100% { transform: translateX(-50%) rotate(-3deg); }
+  50%      { transform: translateX(-50%) rotate(3deg); }
+}
+@keyframes catBop {              /* подпрыгивание при поимке */
+  50% { transform: translateY(-12px); }
+}
+/* рот открыт только во время эффекта */
+.fx-cat .mouth-open { display: none; }
+.fx.on .fx-cat .mouth-open { display: block; }
+.fx.on .fx-cat .mouth-closed { display: none; }
+
+/* Монетки */
+.coin {
+  position: fixed;
+  width: 36px; height: 36px;
+  margin-left: -18px; margin-top: -18px;   /* центрируем по left/top */
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #FFE28A 0%, #FFC93C 45%, #F3A700 100%);
+  box-shadow:
+    0 6px 12px rgba(200, 140, 0, .40),
+    inset 0 -4px 6px rgba(190, 120, 0, .35),
+    inset 0 3px 4px rgba(255, 250, 220, .70);
+  display: grid; place-items: center;
+  opacity: 0;
+  animation: coinFall var(--dur) linear forwards;
+}
+.coin::after { content: "₽"; font: 800 15px/1 system-ui; color: #A96E00; }
+.coin.caught { animation: coinCatch .18s ease-in forwards; }
+@keyframes coinFall {
+  0%   { transform: translateY(-14px) rotate(0deg) scale(.5); opacity: 0; }
+  10%  { opacity: 1; }
+  100% { transform: translate(var(--drift), var(--fall)) rotate(var(--spin)) scale(1); opacity: 1; }
+}
+@keyframes coinCatch {           /* монетка «влетает в рот» кота */
+  from { transform: translate(var(--drift), var(--fall)) rotate(var(--spin)) scale(1); opacity: 1; }
+  to   { transform: translate(var(--drift), calc(var(--fall) - 22px)) rotate(var(--spin)) scale(.1); opacity: 0; }
+}
+</style>
+</head>
+<body>
+
+<!-- ==== МОК-ЭКРАН ПРИЛОЖЕНИЯ ==== -->
+<div class="phone">
+
+  <!-- Шапка: аватар-кот -->
+  <header class="topbar">
+    <div class="avatar" aria-hidden="true">
+      <svg viewBox="0 0 40 40" width="42" height="42" fill="none">
+        <path d="M9 8 14 15 6 14Z" fill="#21A038"/>
+        <path d="M31 8 26 15 34 14Z" fill="#21A038"/>
+        <circle cx="20" cy="21" r="13" fill="#21A038"/>
+        <circle cx="15" cy="19" r="3.2" fill="#fff"/>
+        <circle cx="25" cy="19" r="3.2" fill="#fff"/>
+        <circle cx="15.5" cy="19.5" r="1.6" fill="#1A1D1E"/>
+        <circle cx="25.5" cy="19.5" r="1.6" fill="#1A1D1E"/>
+        <ellipse cx="20" cy="25.5" rx="5.5" ry="3.8" fill="#FDFDF2"/>
+        <ellipse cx="20" cy="26.5" rx="2.2" ry="1.5" fill="#FF7B9C"/>
+        <path d="M5 17h3M6 13h3M32 17h3M31 13h3" stroke="#fff" stroke-width="1.2" stroke-linecap="round" opacity=".8"/>
+      </svg>
+    </div>
+    <div class="greeting">
+      <div class="hello">Привет!</div>
+      <div class="name">Я — СберКот</div>
+    </div>
+    <button class="bell" type="button" aria-label="Уведомления">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M6 9.5a6 6 0 0 1 12 0C18 14 20 16 20 16H4s2-2 2-6.5Z"/>
+        <path d="M10 19a2.2 2.2 0 0 0 4 0"/>
+      </svg>
+    </button>
+  </header>
+
+  <main>
+    <!-- СберКарта с балансом -->
+    <section class="sber-card" id="balanceCard">
+      <div class="card-top">
+        <span class="card-chip">СберКарта</span>
+        <svg viewBox="0 0 28 28" width="26" height="26" aria-label="Сбер" role="img">
+          <circle cx="14" cy="14" r="13" fill="#fff"/>
+          <path d="M7.5 14.5l4 4 9-10" stroke="#21A038" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </div>
+      <p class="balance-label">Баланс</p>
+      <p class="balance">800,55 <span class="cur">₽</span></p>
+      <p class="card-foot">Кот-карта · здесь живут твои деньги 🐾</p>
+    </section>
+
+    <!-- Бонусы Спасибо -->
+    <section class="bonus">
+      <div class="bonus-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="4" y="8" width="16" height="12" rx="2"/>
+          <path d="M12 8v12M8 8C6 8 4.5 6.6 5.5 5.4 6.6 4 9 5 8 8Z"/>
+          <path d="M16 8c2 0 3.5-1.4 2.5-2.6C17.4 4 15 5 16 8Z"/>
+          <path d="M4 13h16"/>
+        </svg>
+      </div>
+      <div class="bonus-text">
+        <p class="bonus-label">Бонусы Спасибо</p>
+        <p class="bonus-num">123 <span>бонуса</span></p>
+      </div>
+      <span class="bonus-arrow" aria-hidden="true">›</span>
+    </section>
+
+    <!-- «Скинуть денег» и квадрат «Себе» -->
+    <div class="actions">
+      <button class="action-card" type="button">
+        <span class="action-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M7 17 17 7"/><path d="M9 7h8v8"/>
+          </svg>
+        </span>
+        <span>Скинуть<br>денег</span>
+      </button>
+      <button class="action-card action-square" type="button">
+        <span class="action-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="8" r="4"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/>
+          </svg>
+        </span>
+        <span>Себе</span>
+      </button>
+    </div>
+  </main>
+
+  <!-- Fallback: кнопки запуска эффекта -->
+  <div class="controls">
+    <p class="hint hidden" id="hintText"></p>
+    <button class="btn ghost hidden" id="btnEnable" type="button">Включить эффект</button>
+    <button class="btn hidden" id="btnShake" type="button">Потрясти</button>
+  </div>
+
+  <!-- Нижняя панель: 4 вкладки -->
+  <nav class="navbar" id="navbar" aria-label="Основные разделы">
+    <button class="nav-item active" type="button">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/>
+      </svg>
+      <span>Главный</span>
+    </button>
+    <button class="nav-item" type="button">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M3 9h12a4 4 0 0 1 4 4v2a4 4 0 0 1-4 4H3a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2Z"/>
+        <path d="M6 9V7.2A1.2 1.2 0 0 1 7.2 6h2.2"/><path d="M14 13.5h.1"/><path d="M4 17v2M9.5 17v2"/>
+      </svg>
+      <span>Копилки</span>
+    </button>
+    <button class="nav-item" type="button">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M9 6.5h11M9 12h11M9 17.5h11"/>
+        <path d="M3.5 6.5 5 8l2.5-3"/><path d="M3.5 12 5 13.5 7.5 10.5"/><path d="M3.5 17.5 5 19l2.5-3"/>
+      </svg>
+      <span>Дела</span>
+    </button>
+    <button class="nav-item" type="button">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="3" y="4" width="18" height="16" rx="4"/>
+        <path d="M10 8.5v7l6-3.5-6-3.5Z" fill="currentColor" stroke="none"/>
+      </svg>
+      <span>Контент</span>
+    </button>
+  </nav>
+</div>
+
+<!-- ==== СЛОЙ ЭФФЕКТА: поверх экрана, не блокирует ввод ==== -->
+<div class="fx" id="fx" aria-hidden="true">
+  <div class="fx-cat" id="fxCat">
+    <div class="fx-cat-inner">
+      <!-- Условная отрисовка СберКота (свой персонаж) -->
+      <svg viewBox="0 0 200 178" role="img" aria-label="СберКот ловит монетки">
+        <!-- хвост -->
+        <path d="M34 138C10 134 4 96 32 84" fill="none" stroke="#12802A" stroke-width="11" stroke-linecap="round"/>
+        <!-- тело и лапки -->
+        <ellipse cx="104" cy="148" rx="54" ry="30" fill="#21A038"/>
+        <ellipse cx="78" cy="164" rx="15" ry="10" fill="#158A2E"/>
+        <ellipse cx="130" cy="164" rx="15" ry="10" fill="#158A2E"/>
+        <ellipse cx="104" cy="152" rx="26" ry="16" fill="#2FB34C" opacity=".55"/>
+        <!-- уши -->
+        <path d="M46 34 72 54 40 66Z" fill="#21A038"/>
+        <path d="M50 42 68 55 45 62Z" fill="#FF9FB8"/>
+        <path d="M154 34 128 54 160 66Z" fill="#21A038"/>
+        <path d="M150 42 132 55 155 62Z" fill="#FF9FB8"/>
+        <!-- голова -->
+        <ellipse cx="100" cy="74" rx="54" ry="46" fill="#21A038"/>
+        <!-- глаза -->
+        <ellipse cx="79" cy="66" rx="12" ry="15" fill="#fff"/>
+        <ellipse cx="121" cy="66" rx="12" ry="15" fill="#fff"/>
+        <ellipse cx="80" cy="67" rx="5.5" ry="7.5" fill="#1A1D1E"/>
+        <ellipse cx="122" cy="67" rx="5.5" ry="7.5" fill="#1A1D1E"/>
+        <circle cx="77.5" cy="63" r="2" fill="#fff"/>
+        <circle cx="119.5" cy="63" r="2" fill="#fff"/>
+        <!-- румянец -->
+        <ellipse cx="64" cy="92" rx="7" ry="4.5" fill="#FFB9CE" opacity=".75"/>
+        <ellipse cx="136" cy="92" rx="7" ry="4.5" fill="#FFB9CE" opacity=".75"/>
+        <!-- светлая мордочка -->
+        <ellipse cx="100" cy="94" rx="28" ry="20" fill="#FDFDF2"/>
+        <!-- нос -->
+        <ellipse cx="100" cy="86" rx="5.5" ry="4" fill="#FF7B9C"/>
+        <!-- усы -->
+        <path d="M66 88 36 82M64 96 34 96M66 104 38 110" stroke="#fff" stroke-width="2.4" stroke-linecap="round" opacity=".85" fill="none"/>
+        <path d="M134 88 164 82M136 96 166 96M134 104 162 110" stroke="#fff" stroke-width="2.4" stroke-linecap="round" opacity=".85" fill="none"/>
+        <!-- рот закрыт (по умолчанию) -->
+        <path class="mouth-closed" d="M88 98Q100 108 112 98" stroke="#1A1D1E" stroke-width="3" stroke-linecap="round" fill="none"/>
+        <!-- рот открыт (во время эффекта) -->
+        <g class="mouth-open">
+          <ellipse cx="100" cy="99" rx="13" ry="11" fill="#5B1E1E"/>
+          <ellipse cx="100" cy="105" rx="8" ry="5.5" fill="#FF87A8"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+  <!-- монетки добавляются сюда из JS -->
+</div>
+
+<script>
+'use strict';
+
+/* ================================================================
+   Конфигурация — все настройки в одном месте, логику менять не надо
+   ================================================================ */
+const CONFIG = {
+  shakeThreshold: 14,     // порог тряски, м/с² (дельта от силы тяжести)
+  gravityMps2: 9.81,      // ускорение свободного падения
+  minShakeGapMs: 1500,    // пауза между запусками эффекта, мс
+  effectDurationMs: 3500, // длительность эффекта, мс (жёстко < 4000)
+  fadeOutMs: 300,         // плавное скрытие слоя после эффекта, мс
+  coinsCount: 12,         // сколько монеток кидается
+  spawnGapMs: 140,        // интервал между монетками, мс
+  coinFallMsMin: 750,     // мин. время полёта монетки, мс
+  coinFallMsMax: 1050,    // макс. время полёта монетки, мс
+  coinDriftPx: 44,        // максимальный боковой «дрейф» монетки, px
+  catWidthPx: 150         // ширина СберКота в слое эффекта, px
+};
+
+/* ================================================================
+   Блок 1. Мок-экран: только переключение вкладок (демонстрация)
+   ================================================================ */
+const navbar = document.getElementById('navbar');
+navbar.addEventListener('click', (e) => {
+  const item = e.target.closest('.nav-item');
+  if (!item) return;
+  // слой эффекта не мешает: pointer-events: none, клики доходят сюда
+  navbar.querySelectorAll('.nav-item').forEach((b) => b.classList.remove('active'));
+  item.classList.add('active');
+});
+
+/* ================================================================
+   Блок 2. Слой эффектов: «СберКот ловит монетки»
+   ================================================================ */
+const fx = document.getElementById('fx');
+const fxCat = document.getElementById('fxCat');
+
+// состояние эффекта: идёт ли сейчас, и таймеры для очистки
+const fxState = { running: false, lastShakeAt: 0, timers: [] };
+
+// зачистить все таймеры эффекта
+function clearFxTimers() {
+  fxState.timers.forEach(clearTimeout);
+  fxState.timers = [];
+}
+
+// спавн одной монетки над картой баланса
+function spawnCoin(area) {
+  const el = document.createElement('div');
+  el.className = 'coin';
+
+  // координаты и параметры полёта — случайные в зоне над картой
+  const x = area.left + Math.random() * area.width;
+  const dur = CONFIG.coinFallMsMin + Math.random() * (CONFIG.coinFallMsMax - CONFIG.coinFallMsMin);
+  el.style.left = x + 'px';
+  el.style.top = area.startY + 'px';
+  el.style.setProperty('--fall', area.fall + 'px');
+  el.style.setProperty('--drift', ((Math.random() * 2 - 1) * CONFIG.coinDriftPx).toFixed(1) + 'px');
+  el.style.setProperty('--dur', dur.toFixed(0) + 'ms');
+  el.style.setProperty('--spin', (Math.random() * 360 - 180).toFixed(0) + 'deg');
+
+  fx.appendChild(el);
+
+  // монетка долетела до кота — «поймана»: усыхает, кот подпрыгивает
+  el.addEventListener('animationend', () => {
+    el.classList.add('caught');
+    fxCat.classList.add('bop');
+    el.addEventListener('animationend', () => el.remove(), { once: true });
+    fxState.timers.push(setTimeout(() => fxCat.classList.remove('bop'), 220));
+  }, { once: true });
+}
+
+// запуск эффекта (защита от повторного запуска)
+function runEffect() {
+  if (fxState.running) return;
+  fxState.running = true;
+  clearFxTimers();
+
+  // очистить слой и показать его
+  fx.innerHTML = '';
+  fx.classList.add('on');
+
+  // зона над картой баланса: посчитать в координатах окна
+  const CARD = document.getElementById('balanceCard').getBoundingClientRect();
+  const catLeft = CARD.left + CARD.width / 2 - CONFIG.catWidthPx / 2;
+  const catTop = Math.min(CARD.bottom + 2, innerHeight - (CONFIG.catWidthPx * 178 / 200) - 4);
+
+  // поставить кота под карту (рот — на высоте ~99/178 высоты SVG)
+  fxCat.style.left = catLeft + 'px';
+  fxCat.style.top = catTop + 'px';
+
+  const area = {
+    left: CARD.left + 26,
+    width: CARD.width - 52,
+    startY: CARD.top - 12,                    // монетки начинают над картой
+    fall: (catTop + 74) - (CARD.top - 12) + 8 // и влетают в рот кота
+  };
+
+  // кидаем монетки с небольшой задержкой друг за другом
+  for (let i = 0; i < CONFIG.coinsCount; i++) {
+    fxState.timers.push(setTimeout(() => spawnCoin(area), i * CONFIG.spawnGapMs));
+  }
+
+  // финал: спрятать слой и полностью очистить его после fade-out
+  fxState.timers.push(setTimeout(() => {
+    fx.classList.remove('on');
+    fxState.timers.push(setTimeout(() => {
+      fx.innerHTML = '';
+      fxState.running = false;
+    }, CONFIG.fadeOutMs));
+  }, CONFIG.effectDurationMs));
+}
+
+/* ================================================================
+   Блок 3. Датчики: тряска телефона (devicemotion)
+   ================================================================ */
+function onDeviceMotion(event) {
+  if (fxState.running) return; // не мешаем текущему эффекту
+  const now = Date.now();
+  if (now - fxState.lastShakeAt < CONFIG.minShakeGapMs) return;
+
+  // считаем «резкость» ускорения относительно силы тяжести
+  const g = event.accelerationIncludingGravity;
+  const a = event.acceleration;
+  let spike = 0;
+  if (a && a.x !== null) {
+    spike = Math.hypot(a.x, a.y, a.z);           // без гравитации
+  } else if (g && g.x !== null) {
+    spike = Math.abs(Math.hypot(g.x, g.y, g.z) - CONFIG.gravityMps2);
+  } else {
+    return;                                      // данных нет — игнорируем
+  }
+
+  if (spike > CONFIG.shakeThreshold) {
+    fxState.lastShakeAt = now;
+    runEffect();
+  }
+}
+
+/* ================================================================
+   Блок 4. Fallback: кнопки «Включить эффект» / «Потрясти»
+   ================================================================ */
+const btnEnable = document.getElementById('btnEnable');
+const btnShake = document.getElementById('btnShake');
+const hintText = document.getElementById('hintText');
+
+const show = (el) => el.classList.remove('hidden');
+const hide = (el) => el.classList.add('hidden');
+const setHint = (text) => { hintText.textContent = text; show(hintText); };
+
+// iOS 13+: разрешение датчика — только по нажатию пользователя
+async function handleEnable() {
+  hide(btnEnable);
+  let granted = false;
+  try {
+    granted = (await DeviceMotionEvent.requestPermission()) === 'granted';
+  } catch (err) {
+    granted = false; // например, не HTTPS — используем fallback
+  }
+  if (granted) {
+    window.addEventListener('devicemotion', onDeviceMotion);
+    setHint('Тряхни телефон — СберКот поймает монетки!');
+  } else {
+    setHint('Датчик недоступен — жми «Потрясти»');
+  }
+  show(btnShake);
+}
+
+// инициализация: что показать в зависимости от возможностей браузера
+function initSensors() {
+  const Motion = window.DeviceMotionEvent;
+  if (Motion && typeof Motion.requestPermission === 'function') {
+    // iOS: сначала просим разрешение жестом
+    show(btnEnable);
+    setHint('Сначала включи эффект — так просит iOS.');
+    btnEnable.addEventListener('click', handleEnable);
+  } else {
+    // Android или ноутбук: слушаем тряску и показываем кнопку-фоллбек
+    if ('DeviceMotionEvent' in window) {
+      window.addEventListener('devicemotion', onDeviceMotion);
+      setHint('Тряхни телефон — или нажми «Потрясти»');
+    } else {
+      setHint('Датчика нет — жми «Потрясти»');
+    }
+    show(btnShake);
+  }
+  btnShake.addEventListener('click', runEffect);
+}
+
+// старт
+initSensors();
+</script>
+</body>
+</html>
